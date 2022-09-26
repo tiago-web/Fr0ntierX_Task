@@ -28,6 +28,7 @@ interface AccountContextData {
   registryContract?: WyvernRegistry;
   accountAddress?: string;
   connectWallet: () => Promise<void>;
+  disconnectWallet: () => void;
 }
 
 const AccountContext = createContext<AccountContextData>(
@@ -53,21 +54,8 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
     WyvernRegistry | undefined
   >();
 
-  const connectWallet = useCallback(async () => {
-    if (!provider) return;
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const address = await signer?.getAddress();
-    setAccountAddress(address);
-  }, [provider]);
-
-  useEffect(() => {
-    const init = async () => {
-      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-
-      const signer = web3Provider?.getSigner();
-      // const address = await signer?.getAddress();
-
+  const connectAddresses = useCallback(
+    (web3Provider: Web3Provider, signer: ethers.providers.JsonRpcSigner) => {
       const erc20 = new ethers.Contract(
         blockchainAddresses.tierXAddress,
         blockchainAbis.tierXAbi,
@@ -94,16 +82,30 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
         signer
       ) as WyvernRegistry;
 
-      setProvider(web3Provider);
       setErc20Contract(erc20);
       setErc721Contract(erc721);
       setExchangeContract(exchange);
       setStaticMarketContract(staticMarket);
       setRegistryContract(registry);
-      // setAccountAddress(address);
-    };
+    },
+    []
+  );
 
-    init();
+  const connectWallet = useCallback(async () => {
+    const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+    await web3Provider.send("eth_requestAccounts", []);
+
+    const signer = web3Provider.getSigner();
+    const address = await signer?.getAddress();
+
+    connectAddresses(web3Provider, signer);
+
+    setProvider(web3Provider);
+    setAccountAddress(address);
+  }, [connectAddresses]);
+
+  const disconnectWallet = useCallback(() => {
+    setAccountAddress(undefined);
   }, []);
 
   const contextValue = useMemo(
@@ -116,6 +118,7 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
       registryContract,
       accountAddress,
       connectWallet,
+      disconnectWallet,
     }),
     [
       provider,
@@ -126,6 +129,7 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
       registryContract,
       connectWallet,
       accountAddress,
+      disconnectWallet,
     ]
   );
 
