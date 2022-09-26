@@ -1,0 +1,26 @@
+node_modules
+package-lock.json
+.encryptedKey.json
+typechain
+typechain-types
+
+# Eth files
+build
+cache
+artifacts
+.env
+
+coverage
+*.lcov
+coverage.json
+
+
+#Hardhat files
+proposals.json
+.notes.md
+typechain-types
+gas-report.txt
+deployments/localhost
+deployments/hardhat
+.video.md
+.article.md 
