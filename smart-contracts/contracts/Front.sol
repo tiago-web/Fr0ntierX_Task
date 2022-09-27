@@ -3,11 +3,55 @@ pragma solidity ^0.8.4;
 
 import "erc721a/contracts/ERC721A.sol";
 
-contract Front is ERC721A {
-    constructor() ERC721A("Front", "FRT") {}
+error Front__InvalidQuantity();
 
-    function mint(uint256 quantity) external payable {
-        // `_mint`'s second argument now takes in a `quantity`, not a `tokenId`.
-        _mint(msg.sender, quantity);
+contract Front is ERC721A {
+  mapping(uint256 => string) private _tokenURIs;
+  string private _customBaseURI;
+
+  event NFTMinted(address requester, uint256 quantity, uint256 lastTokenId);
+
+  constructor(string memory customBaseURI_) ERC721A("Front", "FRT") {
+    _customBaseURI = customBaseURI_;
+  }
+
+  function mint(uint256 quantity, string[] memory ipfsHashes) external payable {
+    if (ipfsHashes.length > 5) {
+      revert Front__InvalidQuantity();
     }
+
+    if (ipfsHashes.length != quantity) {
+      revert Front__InvalidQuantity();
+    }
+    uint256 currentIndex = _nextTokenId();
+
+    for (uint256 i = 0; i < ipfsHashes.length; i++) {
+      _tokenURIs[currentIndex] = ipfsHashes[i];
+    }
+
+    // `_mint`'s second argument now takes in a `quantity`, not a `tokenId`.
+    _mint(msg.sender, quantity);
+
+    emit NFTMinted(msg.sender, quantity, _nextTokenId() - 1);
+  }
+
+  function tokenURI(uint256 tokenId)
+    public
+    view
+    virtual
+    override
+    returns (string memory)
+  {
+    if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+
+    string memory baseURI = _baseURI();
+    return
+      bytes(baseURI).length != 0
+        ? string(abi.encodePacked(baseURI, _tokenURIs[tokenId]))
+        : "";
+  }
+
+  function _baseURI() internal view virtual override returns (string memory) {
+    return _customBaseURI;
+  }
 }

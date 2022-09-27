@@ -50,7 +50,7 @@ module.exports = async function ({
   log("--------------------------------------------------");
 
   log("Deploying Front token contract...");
-  args = [];
+  args = ["https://ipfs.io/ipfs/"];
 
   const frontContract = await deploy("Front", {
     from: deployer,

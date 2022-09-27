@@ -38,23 +38,23 @@ task("files-writer", "Writes abis and contract addresses to a file").setAction(
         export const blockchainAbis = {
           // ERC20 Tokens
           tierXAbi: JSON.parse(
-              readFileSync(path.resolve(__dirname, "../abis/TierX.json"), "utf-8"),
+              readFileSync(path.resolve(__dirname, "./abis/TierX.json"), "utf-8"),
             ),
       
           // ERC721 Token
           frontAbi: JSON.parse(
-              readFileSync(path.resolve(__dirname, "../abis/Front.json"), "utf-8"),
+              readFileSync(path.resolve(__dirname, "./abis/Front.json"), "utf-8"),
             ),
       
           // Exchange Contracts
           wyvernExchangeAbi: JSON.parse(
-              readFileSync(path.resolve(__dirname, "../abis/WyvernExchange.json"), "utf-8"),
+              readFileSync(path.resolve(__dirname, "./abis/WyvernExchange.json"), "utf-8"),
             ),
           staticMarketAbi: JSON.parse(
-              readFileSync(path.resolve(__dirname, "../abis/StaticMarket.json"), "utf-8"),
+              readFileSync(path.resolve(__dirname, "./abis/StaticMarket.json"), "utf-8"),
             ),
           wyvernRegistryAbi: JSON.parse(
-              readFileSync(path.resolve(__dirname, "../abis/WyvernRegistry.json"), "utf-8"),
+              readFileSync(path.resolve(__dirname, "./abis/WyvernRegistry.json"), "utf-8"),
             ),
         };
       
