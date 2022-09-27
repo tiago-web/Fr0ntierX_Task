@@ -13,6 +13,7 @@
     "@emotion/styled": "^11.10.4",
     "@mui/material": "^5.10.6",
     "@mui/styled-engine-sc": "^5.10.6",
+    "@pinata/sdk": "^1.1.26",
     "axios": "^0.27.2",
     "dotenv": "^16.0.2",
     "ethers": "^5.7.1",

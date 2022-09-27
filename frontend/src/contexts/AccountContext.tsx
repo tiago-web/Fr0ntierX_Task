@@ -17,7 +17,7 @@ import {
   TierX,
   WyvernExchange,
   WyvernRegistry,
-} from "../chain/types/ethers-contracts";
+} from "../chain/typechain-types";
 
 interface AccountContextData {
   provider?: Web3Provider;

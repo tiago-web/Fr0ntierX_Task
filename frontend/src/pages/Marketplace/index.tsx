@@ -36,18 +36,6 @@ const Marketplace: React.FC = () => {
   //   alert(tokenName);
   // }, [provider, erc721Contract]);
 
-  const mintToken = useCallback(async () => {
-    if (accountAddress) {
-      try {
-        const tx = await erc721Contract?.mint(2);
-        await tx?.wait(1);
-        setMinted(true);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  }, [provider, erc721Contract, accountAddress]);
-
   return (
     <div>
       <h1>Marketplace</h1>
@@ -60,11 +48,6 @@ const Marketplace: React.FC = () => {
       >
         Token Name
       </button> */}
-      {!minted ? (
-        <button onClick={() => mintToken()}>Mint token</button>
-      ) : (
-        <p>Token minted successfully!</p>
-      )}
     </div>
   );
 };

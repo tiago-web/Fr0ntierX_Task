@@ -13,7 +13,7 @@ const App: React.FC<AppProps> = ({ children }) => {
   return (
     <AccountProvider>
       <Header />
-      <div className="App">{children}</div>
+      <div className="app-container">{children}</div>
       <Toaster />
     </AccountProvider>
   );

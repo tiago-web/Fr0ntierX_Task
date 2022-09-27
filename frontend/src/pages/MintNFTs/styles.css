@@ -1,0 +1,28 @@
+.img-preview-text {
+  text-align: left;
+  margin: 0 auto;
+  width: 300px;
+  padding: 0 0 0.3rem 0.2rem;
+}
+
+.nft-image {
+  width: 300px;
+  height: 300px;
+  border-radius: 20px;
+  border: 1px solid #fff;
+}
+
+.mint-form-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 50rem;
+  margin: 0 auto;
+  text-align: left;
+}
+.mint-form-container label {
+  margin: 1rem 0 0.3rem 0.2rem;
+}
+
+.mint-form-container button {
+  margin-top: 1.5rem;
+}
