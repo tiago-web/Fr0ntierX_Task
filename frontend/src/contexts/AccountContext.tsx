@@ -55,7 +55,7 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
   >();
 
   const connectAddresses = useCallback(
-    (web3Provider: Web3Provider, signer: ethers.providers.JsonRpcSigner) => {
+    (signer: ethers.providers.JsonRpcSigner) => {
       const erc20 = new ethers.Contract(
         blockchainAddresses.tierXAddress,
         blockchainAbis.tierXAbi,
@@ -98,15 +98,23 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
     const signer = web3Provider.getSigner();
     const address = await signer?.getAddress();
 
-    connectAddresses(web3Provider, signer);
+    connectAddresses(signer);
 
     setProvider(web3Provider);
     setAccountAddress(address);
+    localStorage.setItem("isWalletConnected", "true");
   }, [connectAddresses]);
 
   const disconnectWallet = useCallback(() => {
     setAccountAddress(undefined);
+    localStorage.setItem("isWalletConnected", "false");
   }, []);
+
+  useEffect(() => {
+    if (localStorage?.getItem("isWalletConnected") === "true") {
+      connectWallet();
+    }
+  }, [connectWallet]);
 
   const contextValue = useMemo(
     () => ({
