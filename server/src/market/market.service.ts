@@ -27,38 +27,43 @@ export class MarketService {
     @InjectModel(TradeHistory.name)
     private tradeHistoryModel: Model<TradeHistoryDocument>,
     @InjectModel(Front.name)
-    private frontModel: Model<FrontDocument>,
-    private readonly chainService: ChainService,
+    private frontModel: Model<FrontDocument>, // private readonly chainService: ChainService,
   ) {
-    this.chainService.ethersProvider
-      .getBlockNumber()
-      .then((startBlockNumber) => {
-        this.watchFrontTransferEvent(startBlockNumber);
-      })
-      .catch((err) => {
-        console.error(err.message);
-        throw new Error("Error while running marketplace listeners");
-      });
+    // this.chainService.ethersProvider
+    //   .getBlockNumber()
+    //   .then((startBlockNumber) => {
+    //     this.watchFrontTransferEvent(startBlockNumber);
+    //   })
+    //   .catch((err) => {
+    //     console.error(err.message);
+    //     throw new Error("Error while running marketplace listeners");
+    //   });
   }
 
   watchFrontTransferEvent(startBlockNumber: number) {
     console.info("watching front NFTs tranfer events...");
 
-    this.chainService.elementNftsContract.on(
-      "Transfer",
-      async (from, to, tokenId, _event) => {
-        if (_event.blockNumber <= startBlockNumber) return;
+    // this.chainService.elementNftsContract.on(
+    //   "Transfer",
+    //   async (from, to, tokenId, _event) => {
+    //     if (_event.blockNumber <= startBlockNumber) return;
 
-        console.info(
-          `-- Transfer - tokenId ${tokenId}, from ${from}, to ${to}`,
-        );
-      },
-    );
+    //     console.info(
+    //       `-- Transfer - tokenId ${tokenId}, from ${from}, to ${to}`,
+    //     );
+    //   },
+    // );
   }
 
-  async createListing(createListingDto: CreateListingDto) {}
+  async createListing(createListingDto: CreateListingDto) {
+    // todo
+  }
 
-  async findAll(findAllDto: FindAllDto) {}
+  async findAll(findAllDto: FindAllDto) {
+    // todo
+  }
 
-  async cancelListing(cancelListingDto: CancelListingDto) {}
+  async cancelListing(cancelListingDto: CancelListingDto) {
+    // todo
+  }
 }

@@ -13,11 +13,11 @@ import {
   TradeHistorySchema,
 } from "./schemas/trade-history.schema";
 import { Front, FrontSchema } from "./schemas/front.schema";
-import { ChainModule } from "@api/chain/chain.module";
+// import { ChainModule } from "@api/chain/chain.module";
 
 @Module({
   imports: [
-    ChainModule,
+    // ChainModule,
     MongooseModule.forFeature([
       { name: MarketListing.name, schema: MarketListingSchema },
       { name: Log.name, schema: LogSchema },

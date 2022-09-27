@@ -7,27 +7,27 @@ import { MONGODB_DATABASE, DB_NAME } from "./config/constants";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { MarketModule } from "./market/market.module";
+// import { MarketModule } from "./market/market.module";
 
 @Module({
   imports: [
-    MongooseModule.forRoot(MONGODB_DATABASE, {
-      dbName: DB_NAME,
-      retryWrites: true,
-    }),
+    // MongooseModule.forRoot(MONGODB_DATABASE, {
+    //   dbName: DB_NAME,
+    //   retryWrites: true,
+    // }),
     ConfigModule.forRoot({
       load: [configuration],
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string()
-          .valid("development", "production", "test", "provision")
-          .default("development"),
-        PORT: Joi.number().default(3001),
-        RPC_URL: Joi.string().required(),
-        DEPLOYER_MNEMONIC: Joi.string(),
-        DEPLOYER_PRIVATE_KEY: Joi.string(),
+        // NODE_ENV: Joi.string()
+        //   .valid("development", "production", "test", "provision")
+        //   .default("development"),
+        // PORT: Joi.number().default(3001),
+        // RPC_URL: Joi.string().required(),
+        // DEPLOYER_MNEMONIC: Joi.string(),
+        // DEPLOYER_PRIVATE_KEY: Joi.string(),
       }),
     }),
-    MarketModule,
+    // MarketModule,
   ],
   controllers: [AppController],
   providers: [AppService],
