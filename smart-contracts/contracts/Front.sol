@@ -2,12 +2,14 @@
 pragma solidity ^0.8.4;
 
 import "erc721a/contracts/ERC721A.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
 error Front__InvalidQuantity();
 
-contract Front is ERC721A {
-  mapping(uint256 => string) private _tokenURIs;
+contract Front is ERC721A, Ownable {
   string private _customBaseURI;
+
+  mapping(uint256 => string) private _tokenURIs;
 
   event NFTMinted(address requester, uint256 quantity, uint256 lastTokenId);
 
@@ -49,6 +51,10 @@ contract Front is ERC721A {
       bytes(baseURI).length != 0
         ? string(abi.encodePacked(baseURI, _tokenURIs[tokenId]))
         : "";
+  }
+
+  function setBaseURI(string memory newBaseURI) public onlyOwner {
+    _customBaseURI = newBaseURI;
   }
 
   function _baseURI() internal view virtual override returns (string memory) {
