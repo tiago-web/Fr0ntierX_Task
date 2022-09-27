@@ -1,17 +1,12 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, Types } from "mongoose";
-import { MarketListing } from "./market-listing.schema";
+import { Document } from "mongoose";
 
 export type TradeHistoryDocument = TradeHistory & Document;
 
 @Schema({ timestamps: true })
 export class TradeHistory {
-  @Prop({
-    required: true,
-    type: Types.ObjectId,
-    ref: "MarketListing",
-  })
-  listing: MarketListing;
+  @Prop({ required: true })
+  tokenId: number;
 
   @Prop({ required: true })
   buyerAddress: string;

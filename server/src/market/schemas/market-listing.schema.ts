@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
-import { Document, Types } from "mongoose";
-import { Front } from "./front.schema";
+import { Document } from "mongoose";
 
 export type MarketListingDocument = MarketListing & Document;
 
@@ -11,12 +10,6 @@ export class MarketListing {
   @ApiProperty()
   tokenId: number;
 
-  @Prop({
-    required: true,
-    type: Types.ObjectId,
-  })
-  token: Front;
-
   @Prop({ required: true })
   @ApiProperty()
   sellerAddress: string;
@@ -24,10 +17,6 @@ export class MarketListing {
   @Prop({ required: true })
   @ApiProperty()
   price: number;
-
-  @Prop({ required: true })
-  @ApiProperty()
-  expirationTimestamp: number;
 
   @Prop()
   active: boolean;

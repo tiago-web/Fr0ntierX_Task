@@ -16,6 +16,7 @@ import {
   TradeHistoryDocument,
 } from "./schemas/trade-history.schema";
 import { Front, FrontDocument } from "./schemas/front.schema";
+import { ChainService } from "../chain/chain.service";
 
 @Injectable()
 export class MarketService {
@@ -27,32 +28,53 @@ export class MarketService {
     @InjectModel(TradeHistory.name)
     private tradeHistoryModel: Model<TradeHistoryDocument>,
     @InjectModel(Front.name)
-    private frontModel: Model<FrontDocument>, // private readonly chainService: ChainService,
+    private frontModel: Model<FrontDocument>,
+    private readonly chainService: ChainService,
   ) {
-    // this.chainService.ethersProvider
-    //   .getBlockNumber()
-    //   .then((startBlockNumber) => {
-    //     this.watchFrontTransferEvent(startBlockNumber);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err.message);
-    //     throw new Error("Error while running marketplace listeners");
-    //   });
+    this.chainService.ethersProvider
+      .getBlockNumber()
+      .then((startBlockNumber) => {
+        this.watchNFTMintedEvent(startBlockNumber);
+        this.watchFrontTransferEvent(startBlockNumber);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        throw new Error("Error while running marketplace listeners");
+      });
+  }
+
+  watchNFTMintedEvent(startBlockNumber: number) {
+    console.info("watching NFT minted events...");
+
+    this.chainService.erc721Contract.on(
+      "NFTMinted",
+      async (requester, quantity, lastTokenId, _event) => {
+        if (_event.blockNumber <= startBlockNumber) return;
+
+        // todo: append tokenId to user that minted
+
+        console.info(
+          `-- NFTMinted - requester ${requester}, quantity ${quantity}, lastTokenId ${lastTokenId}`,
+        );
+      },
+    );
   }
 
   watchFrontTransferEvent(startBlockNumber: number) {
     console.info("watching front NFTs tranfer events...");
 
-    // this.chainService.elementNftsContract.on(
-    //   "Transfer",
-    //   async (from, to, tokenId, _event) => {
-    //     if (_event.blockNumber <= startBlockNumber) return;
+    this.chainService.erc721Contract.on(
+      "Transfer",
+      async (from, to, tokenId, _event) => {
+        if (_event.blockNumber <= startBlockNumber) return;
 
-    //     console.info(
-    //       `-- Transfer - tokenId ${tokenId}, from ${from}, to ${to}`,
-    //     );
-    //   },
-    // );
+        // todo: remove from previous owner and add to new owner
+
+        console.info(
+          `-- Transfer - tokenId ${tokenId}, from ${from}, to ${to}`,
+        );
+      },
+    );
   }
 
   async createListing(createListingDto: CreateListingDto) {
