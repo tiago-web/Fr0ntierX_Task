@@ -1,18 +1,32 @@
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  font-family: "Poppins", sans-serif;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #fafafa;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  --dark-green: #005e2a;
+  --green: #009036;
+  --lighter-green: #1a9587;
+  --light-green: #0e9240;
+  --red: #e20026;
+  --blue: #3aaadc;
+  --yellow: #f6a800;
+  --dark: #333333;
+  --gray: #98a2a7;
+  --white-gray: #ffffff;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 a {
@@ -27,36 +41,76 @@ body {
   min-height: 100vh;
 }
 
+html {
+  scroll-behavior: smooth;
+  font-size: 34%;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+h1,
+h2,
+h3,
+p,
+span,
+label,
+button,
+a {
+  font-family: "Poppins", sans-serif;
+  color: #333333;
 }
 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-  font-size: 1em;
+  font-size: 1rem;
+  color: #fff;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #005e2a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.4s;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+button:hover {
+  background-color: #003317;
+}
+
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+/* Extra small devices (portrait phones, less than 576px)
+   No media query since this is the default in Bootstrap */
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) {
+  html {
+    font-size: 70%;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+  html {
+    font-size: 80%;
+  }
+}
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+  html {
+    font-size: 90%;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {
+  html {
+    font-size: 100%;
   }
 }

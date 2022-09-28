@@ -1,7 +1,12 @@
+import { useState } from "react";
+
+import { AiOutlineCloseCircle } from "react-icons/ai";
+
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
-import { useState } from "react";
 import { useAccount } from "../../contexts/AccountContext";
+
+import "./styles.css";
 
 const ConnectWallet: React.FC = () => {
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
@@ -44,15 +49,14 @@ const ConnectWallet: React.FC = () => {
       >
         <Box
           sx={{
-            position: "absolute" as "absolute",
+            position: "relative" as "relative",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 600,
-            bgcolor: "#000",
-            border: "2px solid #000",
+            width: "30rem",
+            bgcolor: "#fafafa",
             boxShadow: 24,
-            borderRadius: 10,
+            borderRadius: 3,
             p: 4,
             display: "flex",
             flexDirection: "column",
@@ -60,6 +64,13 @@ const ConnectWallet: React.FC = () => {
             justifyContent: "center",
           }}
         >
+          <AiOutlineCloseCircle
+            className="modal-close-icon"
+            onClick={() => {
+              setShowDisconnectModal(false);
+            }}
+          />
+
           <p>
             <strong>Connected Wallet:</strong> {accountAddress}
           </p>

@@ -7,12 +7,8 @@ import {
   MarketListing,
   MarketListingSchema,
 } from "./schemas/market-listing.schema";
-import { Log, LogSchema } from "./schemas/log.schema";
-import {
-  TradeHistory,
-  TradeHistorySchema,
-} from "./schemas/trade-history.schema";
-import { Front, FrontSchema } from "./schemas/front.schema";
+
+import { User, UserSchema } from "./schemas/user.schema";
 import { ChainModule } from "../chain/chain.module";
 
 @Module({
@@ -20,9 +16,7 @@ import { ChainModule } from "../chain/chain.module";
     ChainModule,
     MongooseModule.forFeature([
       { name: MarketListing.name, schema: MarketListingSchema },
-      { name: Log.name, schema: LogSchema },
-      { name: TradeHistory.name, schema: TradeHistorySchema },
-      { name: Front.name, schema: FrontSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [MarketController],

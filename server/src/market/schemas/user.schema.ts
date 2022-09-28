@@ -1,15 +1,15 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
-export type TradeHistoryDocument = TradeHistory & Document;
+export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
-export class TradeHistory {
+export class User {
   @Prop({ required: true })
-  tokenId: number;
+  userAddress: string;
 
   @Prop({ required: true })
-  buyerAddress: string;
+  tokenIds: number[];
 
   @Prop()
   createdAt?: Date;
@@ -18,4 +18,4 @@ export class TradeHistory {
   updatedAt?: Date;
 }
 
-export const TradeHistorySchema = SchemaFactory.createForClass(TradeHistory);
+export const UserSchema = SchemaFactory.createForClass(User);

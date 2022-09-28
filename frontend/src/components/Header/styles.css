@@ -4,11 +4,13 @@
   width: auto;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.6rem 1.3rem;
+
+  background-color: #005e2a1f;
 }
 
 .logo a {
-  color: #fff;
+  color: #005e2a;
   display: flex;
   font-size: 1.3rem;
   font-weight: bold;
@@ -16,23 +18,35 @@
 
 .links {
   display: flex;
-  width: 30rem;
+  width: 20rem;
   justify-content: space-between;
 }
 
 .links a {
-  color: #fff;
   display: flex;
   justify-content: space-between;
   font-size: 1rem;
+  color: #98a2a7;
+  font-weight: 500;
 }
 
 .links a.active {
-  border-bottom: 2px solid #fff;
-  color: rgb(204, 19, 19);
+  color: #f6a800;
+  position: relative;
 }
 
-.connect-wallet {
+.links a.active:after {
+  content: "";
+  width: -webkit-fill-available;
+  height: 3px;
+  display: block;
+  background-color: #005e2a;
+  position: absolute;
+  bottom: -1.4rem;
 }
-.disconnect-wallet {
+
+@media (max-width: 768px) {
+  .links a.active:after {
+    height: 1px;
+  }
 }

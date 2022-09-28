@@ -1,0 +1,21 @@
+.connect-wallet {
+  color: #005e2a;
+  background: transparent;
+  border: 1px solid #005e2a;
+}
+
+.connect-wallet:hover {
+  color: #fff;
+  border: 1px solid #005e2a;
+  background: #005e2a;
+}
+
+.modal-close-icon {
+  cursor: pointer;
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  top: -1.8rem;
+  right: 0.4rem;
+  color: #f6a800 !important;
+}

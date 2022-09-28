@@ -25,10 +25,16 @@ const FRTFaucet: React.FC = () => {
   }, [erc20Contract, accountAddress]);
 
   return (
-    <div>
+    <div className="faucet-container">
       <h1>FRT Faucet</h1>
       {isMinting ? (
-        <CircularProgress />
+        <CircularProgress
+          sx={{
+            color: "#005e2a",
+            position: "absolute",
+            left: "50%",
+          }}
+        />
       ) : !minted ? (
         accountAddress ? (
           <button onClick={handleSendERC20}>Send me 200 testnet FRT</button>

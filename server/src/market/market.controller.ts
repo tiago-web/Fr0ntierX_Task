@@ -1,8 +1,8 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, Param, Get } from "@nestjs/common";
 import { MarketService } from "./market.service";
 import { CreateListingDto } from "./dto/create-listing.dto";
 import { CancelListingDto } from "./dto/cancel-listing.dto";
-import { FindAllDto } from "./dto/find-all.dto";
+import { FindListingsDto } from "./dto/find-listings.dto";
 import { ApiTags } from "@nestjs/swagger";
 // import { WebsocketExceptionsFilter } from "@api/common/ws-error.filter";
 
@@ -12,18 +12,23 @@ import { ApiTags } from "@nestjs/swagger";
 export class MarketController {
   constructor(private readonly marketService: MarketService) {}
 
-  @Post("/createListing")
+  @Post("/create-listing")
   createListing(@Body() createListingDto: CreateListingDto) {
     return this.marketService.createListing(createListingDto);
   }
 
-  @Post("/findAll")
-  findAll(@Body() findAllDto: FindAllDto) {
-    return this.marketService.findAll(findAllDto);
+  @Post("/find-listings")
+  findAll(@Body() findListings: FindListingsDto) {
+    return this.marketService.findListings(findListings);
   }
 
-  @Post("/cancelListing")
+  @Post("/cancel-listing")
   cancelListing(@Body() cancelListingDto: CancelListingDto) {
     return this.marketService.cancelListing(cancelListingDto);
+  }
+
+  @Get("/find-user-nfts/:address")
+  findMyNFTs(@Param("address") address: string) {
+    return this.marketService.findUserNFTs(address);
   }
 }

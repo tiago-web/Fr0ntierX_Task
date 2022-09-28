@@ -11,4 +11,9 @@ export class CancelListingDto {
   @IsString()
   @IsNotEmpty()
   signature: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  userAddress: string;
 }

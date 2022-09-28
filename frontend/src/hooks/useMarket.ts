@@ -46,11 +46,11 @@ interface Order
 interface UseMarketProps {
   listErc721ForErc20: (
     options: ListERC721ForERC20Options
-  ) => Promise<{ orderOne: Order; sigOne: any } | undefined>;
+  ) => Promise<{ orderOne: Order; sigOne: string } | undefined>;
 
   buyErc721ForErc20: (
     options: BuyErc721ForErc20Options
-  ) => Promise<{ orderTwo: Order; sigTwo: any } | undefined>;
+  ) => Promise<{ orderTwo: Order; sigTwo: string } | undefined>;
   executeErc721ForErc20: (
     options: ExecuteErc721ForErc20Options
   ) => Promise<void>;

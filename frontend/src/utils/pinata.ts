@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IMetadata } from "../pages/MintNFTs";
+import { IMetadata } from "../components/MintNFTsModal";
 import { toastError } from "./errorHandlers";
 
 export const pinJSONToIPFS = async (nfts: IMetadata[]): Promise<string[]> => {
@@ -8,11 +8,11 @@ export const pinJSONToIPFS = async (nfts: IMetadata[]): Promise<string[]> => {
   const pinataApiKey = import.meta.env.VITE_PINATA_KEY;
   const pinataApiSecret = import.meta.env.VITE_PINATA_SECRET;
 
-  for (let i = 0; i < nfts.length; i++) {
-    try {
+  try {
+    for (const nft of nfts) {
       const response = await axios.post(
         "https://api.pinata.cloud/pinning/pinJSONToIPFS",
-        nfts[i],
+        nft,
         {
           headers: {
             pinata_api_key: pinataApiKey,
@@ -22,9 +22,9 @@ export const pinJSONToIPFS = async (nfts: IMetadata[]): Promise<string[]> => {
       );
 
       ipfsHashes.push(response.data.IpfsHash);
-    } catch (err) {
-      toastError(err);
     }
+  } catch (err) {
+    toastError(err);
   }
 
   return ipfsHashes;

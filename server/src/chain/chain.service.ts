@@ -73,4 +73,15 @@ export class ChainService {
     const owner = await this.erc721Contract.ownerOf(tokenId);
     return owner;
   }
+
+  async getTokenURI(tokenId: number): Promise<string> {
+    const tokenURI = await this.erc721Contract.tokenURI(tokenId);
+    return tokenURI;
+  }
+
+  async recoverAddress(signature: string, message: string): Promise<string> {
+    const address = ethers.utils.verifyMessage(message, signature);
+
+    return address.toLowerCase();
+  }
 }
