@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IMetadata } from "../components/MintNFTsModal";
+import { IMetadata } from "../pages/Marketplace";
 import { toastError } from "./errorHandlers";
 
 export const pinJSONToIPFS = async (nfts: IMetadata[]): Promise<string[]> => {

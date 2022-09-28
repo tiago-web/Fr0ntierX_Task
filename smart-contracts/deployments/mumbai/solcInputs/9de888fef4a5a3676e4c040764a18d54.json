@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/WyvernAtomicizer.sol": {
+      "content": "/*\r\n  << Wyvern Atomicizer >>\r\n  Execute multiple transactions, in order, atomically (if any fails, all revert).\r\n*/\r\n\r\npragma solidity 0.7.5;\r\n\r\n/**\r\n * @title WyvernAtomicizer\r\n * @author Wyvern Protocol Developers\r\n */\r\nlibrary WyvernAtomicizer {\r\n    function atomicize(\r\n        address[] calldata addrs,\r\n        uint[] calldata values,\r\n        uint[] calldata calldataLengths,\r\n        bytes calldata calldatas\r\n    ) external {\r\n        require(\r\n            addrs.length == values.length &&\r\n                addrs.length == calldataLengths.length,\r\n            \"Addresses, calldata lengths, and values must match in quantity\"\r\n        );\r\n\r\n        uint j = 0;\r\n        for (uint i = 0; i < addrs.length; i++) {\r\n            bytes memory cd = new bytes(calldataLengths[i]);\r\n            for (uint k = 0; k < calldataLengths[i]; k++) {\r\n                cd[k] = calldatas[j];\r\n                j++;\r\n            }\r\n            (bool success, ) = addrs[i].call{value: values[i]}(cd);\r\n            require(success, \"Atomicizer subcall failed\");\r\n        }\r\n    }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 1
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

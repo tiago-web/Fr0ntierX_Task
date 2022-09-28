@@ -14,6 +14,7 @@ const BSC_TESTNET_RPC_URL =
 const MUMBAI_RPC_URL =
   process.env.ALCHEMY_MUMBAI || "https://rpc-mumbai.maticvigil.com";
 const MNEMONIC = process.env.MNEMONIC || "your mnemonic";
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "your private key";
 const REPORT_GAS = process.env.REPORT_GAS || false;
 const COINMARKETCAP_API_KEY =
   process.env.COINMARKETCAP_API_KEY || "your api key";
@@ -57,7 +58,8 @@ module.exports = {
       chainId: 80001,
       saveDeployments: true,
       blockConfirmations: 2,
-      accounts: { mnemonic: MNEMONIC },
+      accounts: [process.env.PRIVATE_KEY],
+      // accounts: { mnemonic: MNEMONIC },
     },
     // bscTestnet: {
     //   url: BSC_TESTNET_RPC_URL,

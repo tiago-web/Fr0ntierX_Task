@@ -1,14 +1,14 @@
-import { Controller, Post, Body, Param, Get } from "@nestjs/common";
+import { Controller, Post, Body, Param, Get, UseFilters } from "@nestjs/common";
 import { MarketService } from "./market.service";
 import { CreateListingDto } from "./dto/create-listing.dto";
 import { CancelListingDto } from "./dto/cancel-listing.dto";
 import { FindListingsDto } from "./dto/find-listings.dto";
 import { ApiTags } from "@nestjs/swagger";
-// import { WebsocketExceptionsFilter } from "@api/common/ws-error.filter";
+import { HttpExceptionFilter } from "src/common/http-exception.filter";
 
 @ApiTags("market")
 @Controller("market")
-// @UseFilters(new WebsocketExceptionsFilter())
+@UseFilters(new HttpExceptionFilter())
 export class MarketController {
   constructor(private readonly marketService: MarketService) {}
 

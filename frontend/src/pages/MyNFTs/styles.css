@@ -1,5 +1,17 @@
-.mynfts-herader {
+.mynfts-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.nfts-container {
+  width: 100%;
+  column-gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.connect-wallet-wrapper {
+  width: fit-content;
 }

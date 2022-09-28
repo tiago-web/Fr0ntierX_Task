@@ -44,3 +44,11 @@
   color: var(--dark);
   padding: 0.4rem;
 }
+
+.mint-form-container p {
+  text-align: left;
+  width: 100%;
+
+  font-size: 0.8rem;
+  margin: 0.6rem 0 0.2rem 0.2rem;
+}

@@ -1,4 +1,4 @@
-// import { ValidationPipe } from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
@@ -11,12 +11,12 @@ async function bootstrap() {
   app.enableCors();
 
   // use this pipe to validate http requests app wide
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     whitelist: true,
-  //     transform: true,
-  //   }),
-  // );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   // API Docs Set Up
   const apiDocsConfig = new DocumentBuilder()

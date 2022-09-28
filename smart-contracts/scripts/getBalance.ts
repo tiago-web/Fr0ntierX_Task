@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
-import "dotenv/config";
 import { TierX } from "../typechain-types";
+import "dotenv/config";
 
 // Usage: yarn hardhat run ./scripts/getBalance.ts --network localhost
 async function main() {

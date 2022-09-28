@@ -1,4 +1,4 @@
-const Web3 = require("web3");
+import Web3 from "web3";
 let web3 = new Web3(window?.web3.currentProvider);
 
 const eip712Domain = {
@@ -32,12 +32,13 @@ web3 = web3.extend({
       name: "signTypedData",
       call: "eth_signTypedData",
       params: 2,
+      // @ts-ignore
       inputFormatter: [web3.extend.formatters.inputAddressFormatter, null],
     },
   ],
 });
 
-const structToSign = (order, exchange) => {
+const structToSign = (order: any, exchange: any) => {
   return {
     name: eip712Order.name,
     fields: eip712Order.fields,
@@ -51,7 +52,7 @@ const structToSign = (order, exchange) => {
   };
 };
 
-const parseSig = (bytes) => {
+const parseSig = (bytes: any) => {
   bytes = bytes.substr(2);
   const r = "0x" + bytes.slice(0, 64);
   const s = "0x" + bytes.slice(64, 128);
@@ -59,18 +60,18 @@ const parseSig = (bytes) => {
   return { v, r, s };
 };
 
-const wrap = (inst) => {
+const wrap = (inst: any) => {
   var obj = {
     inst: inst,
     atomicMatchWith: (
-      order,
-      sig,
-      call,
-      counterorder,
-      countersig,
-      countercall,
-      metadata,
-      misc
+      order: any,
+      sig: any,
+      call: any,
+      counterorder: any,
+      countersig: any,
+      countercall: any,
+      metadata: any,
+      misc: any
     ) =>
       inst.atomicMatch_(
         [
@@ -113,23 +114,28 @@ const wrap = (inst) => {
         ),
         misc
       ),
+
+    sign: (order: any, account: any) => {},
   };
-  obj.sign = (order, account) => {
+  obj.sign = (order: any, account: any): any => {
     const str = structToSign(order, inst.address);
-    return web3
-      .signTypedData(account, {
-        types: {
-          EIP712Domain: eip712Domain.fields,
-          Order: eip712Order.fields,
-        },
-        domain: str.domain,
-        primaryType: "Order",
-        message: order,
-      })
-      .then((sigBytes) => {
-        const sig = parseSig(sigBytes);
-        return sig;
-      });
+    return (
+      web3
+        // @ts-ignore
+        .signTypedData(account, {
+          types: {
+            EIP712Domain: eip712Domain.fields,
+            Order: eip712Order.fields,
+          },
+          domain: str.domain,
+          primaryType: "Order",
+          message: order,
+        })
+        .then((sigBytes: any) => {
+          const sig = parseSig(sigBytes);
+          return sig;
+        })
+    );
   };
 
   return obj;
@@ -138,7 +144,4 @@ const wrap = (inst) => {
 const ZERO_BYTES32 =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-module.exports = {
-  wrap,
-  ZERO_BYTES32,
-};
+export { wrap, ZERO_BYTES32 };

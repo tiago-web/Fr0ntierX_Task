@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
-import "dotenv/config";
 import { Front } from "../typechain-types";
+import "dotenv/config";
 
 // Usage: yarn hardhat run ./scripts/mintERC721aToken.ts --network localhost
 async function main() {

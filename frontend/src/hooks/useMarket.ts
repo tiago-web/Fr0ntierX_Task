@@ -3,7 +3,6 @@ import Web3 from "web3";
 import { blockchainAbis } from "../chain/config";
 import { OrderApprovedEventObject } from "../chain/typechain-types/abis/WyvernExchange";
 import { useAccount } from "../contexts/AccountContext";
-// @ts-ignore
 import { wrap, ZERO_BYTES32 } from "../utils/wyvern";
 
 interface ListERC721ForERC20Options {
@@ -85,15 +84,17 @@ export const useMarket = (): UseMarketProps => {
       return;
     const { tokenId, sellingPrice } = options;
 
+    // todo: Validate if there is a proxy already registered
     // register proxy for account a
-    await registryContract.registerProxy({ from: accountAddress });
+    // await registryContract.registerProxy({ from: accountAddress });
 
-    const proxy1 = await registryContract.proxies(accountAddress);
+    // const proxy1 = await registryContract.proxies(accountAddress);
 
     // Approve proxy to use all NFTs from account a
-    await erc721Contract.setApprovalForAll(proxy1, true, {
-      from: accountAddress,
-    });
+    // todo: Validate if the user already approved for all
+    // await erc721Contract.setApprovalForAll(proxy1, true, {
+    //   from: accountAddress,
+    // });
 
     const web3 = new Web3(window.web3.currentProvider);
 
@@ -143,6 +144,7 @@ export const useMarket = (): UseMarketProps => {
 
     const { tokenId, buyingPrice } = options;
 
+    // todo: Validate if there is a proxy already registered
     // register proxy for account b
     await registryContract.registerProxy({ from: accountAddress });
 

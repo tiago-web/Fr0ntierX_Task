@@ -13,6 +13,7 @@ import {
 
 import { User, UserDocument } from "./schemas/user.schema";
 import { ChainService } from "../chain/chain.service";
+import { BigNumber } from "ethers";
 
 @Injectable()
 export class MarketService {
@@ -26,7 +27,6 @@ export class MarketService {
     this.chainService.ethersProvider
       .getBlockNumber()
       .then((startBlockNumber) => {
-        this.watchNFTMintedEvent(startBlockNumber);
         this.watchFrontTransferEvent(startBlockNumber);
       })
       .catch((err) => {
@@ -35,49 +35,15 @@ export class MarketService {
       });
   }
 
-  watchNFTMintedEvent(startBlockNumber: number) {
-    console.info("watching NFT minted events...");
-
-    this.chainService.erc721Contract.on(
-      "NFTMinted",
-      async (
-        requester: string,
-        quantity: number,
-        lastTokenId: number,
-        _event,
-      ) => {
-        if (_event.blockNumber <= startBlockNumber) return;
-
-        console.info(
-          `-- NFTMinted - requester ${requester}, quantity ${quantity}, lastTokenId ${lastTokenId}`,
-        );
-
-        const user = await this.getUser(requester);
-
-        const newTokenIds = [];
-
-        let currentTokenId = lastTokenId;
-        for (let i = 0; i < quantity; i++) {
-          newTokenIds.push(currentTokenId);
-          currentTokenId--;
-        }
-
-        // Keep track of the tokenIds owner by the user
-        await this.userModel.findOneAndUpdate(
-          { userAddress: user.userAddress },
-          { $push: { tokenIds: { $each: newTokenIds } } },
-        );
-      },
-    );
-  }
-
   watchFrontTransferEvent(startBlockNumber: number) {
     console.info("watching front NFTs tranfer events...");
 
     this.chainService.erc721Contract.on(
       "Transfer",
-      async (from, to, tokenId, _event) => {
+      async (from, to, _tokenId: BigNumber, _event) => {
         if (_event.blockNumber <= startBlockNumber) return;
+
+        const tokenId = _tokenId.toNumber();
 
         console.info(
           `-- Transfer - tokenId ${tokenId}, from ${from}, to ${to}`,
@@ -100,6 +66,14 @@ export class MarketService {
         await this.userModel.findOneAndUpdate(
           { userAddress: newOwner.userAddress },
           { $push: { tokenIds: tokenId } },
+        );
+
+        // Deactivate token listing
+        await this.marketListingModel.updateOne(
+          { tokenId: tokenId },
+          {
+            $set: { active: false },
+          },
         );
       },
     );
@@ -144,12 +118,26 @@ export class MarketService {
       const { page = 1, limit = 10 } = findListingsDto;
 
       const foundListedTokens = await this.marketListingModel
-        .findOne({ active: true })
+        .find({ active: true })
         .skip((page - 1) * limit)
         .limit(limit * 1)
         .exec();
 
-      return foundListedTokens;
+      const tokens = [];
+
+      for (const listedToken of foundListedTokens) {
+        const tokenURI = await this.chainService.getTokenURI(
+          listedToken.tokenId,
+        );
+
+        tokens.push({
+          tokenURI,
+          price: listedToken.price,
+          tokenId: listedToken.tokenId,
+        });
+      }
+
+      return tokens;
     } catch (err) {
       throw new Error(err);
     }
@@ -183,17 +171,17 @@ export class MarketService {
 
   async findUserNFTs(userAddress: string): Promise<string[]> {
     try {
-      const nftsWithMetadata = [];
+      const tokens = [];
 
       const nfts = await this.getUser(userAddress);
 
       for (const tokenId of nfts.tokenIds) {
         const tokenURI = await this.chainService.getTokenURI(tokenId);
 
-        nftsWithMetadata.push(tokenURI);
+        tokens.push({ tokenURI, tokenId });
       }
 
-      return nftsWithMetadata;
+      return tokens;
     } catch (err) {
       throw new Error(err);
     }

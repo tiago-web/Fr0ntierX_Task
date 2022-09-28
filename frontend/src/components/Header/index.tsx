@@ -1,23 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAccount } from "../../contexts/AccountContext";
 
-import "./styles.css";
 import ConnectWallet from "../ConnectWallet";
 
+import "./styles.css";
+
 const Header: React.FC = () => {
-  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
-  const { accountAddress, connectWallet, disconnectWallet } = useAccount();
   const [activeRoute, setActiveRoute] = useState("");
   const location = useLocation();
 
   useEffect(() => {
     setActiveRoute(location.pathname);
   }, [location.pathname]);
-
-  useEffect(() => {
-    console.log("activeRoute", activeRoute);
-  }, [activeRoute]);
 
   return (
     <div className="header-container">
