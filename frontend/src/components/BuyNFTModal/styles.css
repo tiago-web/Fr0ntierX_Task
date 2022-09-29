@@ -1,0 +1,23 @@
+.buy-nft-container {
+  width: 100%;
+}
+.buy-nft-container img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 0.4rem;
+}
+
+.buy-nft-container strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.buy-nft-container p {
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.buy-nft-container button {
+  width: 100%;
+  margin-top: 0.8rem;
+}

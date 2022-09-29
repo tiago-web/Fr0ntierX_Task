@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { useAccount } from "../../contexts/AccountContext";
-import MintNFTsModal from "../../components/MintNFTsModal";
-import "./styles.css";
-import { toastError } from "../../utils/errorHandlers";
+import { BigNumber } from "ethers";
 import { CircularProgress } from "@mui/material";
-import NFTCard from "../../components/NFTCard";
-import { api } from "../../api";
+
 import { IMetadata } from "../Marketplace";
 import ConnectWallet from "../../components/ConnectWallet";
-import { BigNumber } from "ethers";
+import MintNFTsModal from "../../components/MintNFTsModal";
+import NFTCard from "../../components/NFTCard";
+
+import { useAccount } from "../../contexts/AccountContext";
+import { toastError, toastSuccess } from "../../utils/errorHandlers";
+import { api } from "../../api";
+
+import "./styles.css";
 
 interface FindUserNFTsResponse {
   tokenId: BigNumber;
   tokenURI: string;
+  isListed: boolean;
 }
 
 type MyNftsProps = IMetadata &
@@ -40,23 +44,6 @@ const MyNFTs: React.FC = () => {
       );
       const myTokens: MyNftsProps[] = [];
 
-      // todo: remove mock
-      // myTokens.push(
-      //   {
-      //     image:
-      //       "https://post.greatist.com/wp-content/uploads/sites/3/2020/02/322868_1100-800x825.jpg",
-      //     name: "Dog",
-      //     description: "A cute dog",
-      //     tokenId: "0",
-      //   },
-      //   {
-      //     image:
-      //       "https://post.greatist.com/wp-content/uploads/sites/3/2020/02/322868_1100-800x825.jpg",
-      //     name: "Dog 2",
-      //     description: "A cute dog 2",
-      //     tokenId: "1",
-      //   }
-      // );
       for (const token of tokens) {
         const requestURL = token.tokenURI.replace(
           "ipfs://",
@@ -72,6 +59,7 @@ const MyNFTs: React.FC = () => {
         myTokens.push({
           ...tokenURIResponse.data,
           tokenId: String(token.tokenId),
+          isListed: token.isListed,
           image: imageURIURL,
         });
       }
@@ -98,7 +86,7 @@ const MyNFTs: React.FC = () => {
               setShowMintNFTsModal(true);
             }}
           >
-            Mint NFTs
+            Mint NFT(s)
           </button>
         )}
       </div>
@@ -118,18 +106,42 @@ const MyNFTs: React.FC = () => {
           }}
         />
       ) : (
-        <div className="nfts-container">
-          {myNfts.map((nft) => (
-            <NFTCard key={nft.name} nft={nft} showListBtn />
-          ))}
-        </div>
+        <>
+          {myNfts.length ? (
+            <div className="nfts-container">
+              {myNfts.map((nft) => (
+                <NFTCard
+                  key={nft.name}
+                  nft={nft}
+                  showListBtn
+                  loadMyNFTs={loadMyNFTs}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="no-nfts-container">
+              <p>
+                You don't have any NFTs in your wallet yet. Mint your first one
+                first one to get started!
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMintNFTsModal(true);
+                }}
+              >
+                Mint Free NFTs
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       <MintNFTsModal
         open={showMintNFTsModal}
-        onClose={async () => {
+        onClose={() => {
           setShowMintNFTsModal(false);
-          await loadMyNFTs();
+          loadMyNFTs();
         }}
       />
     </>

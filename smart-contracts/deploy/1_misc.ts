@@ -100,14 +100,14 @@ module.exports = async function ({
     ],
     Buffer.from("\x19Ethereum Signed Message:\n", "binary"),
   ];
-  const WyvernExchangeContract = await deploy("WyvernExchange", {
+  const wyvernExchangeContract = await deploy("WyvernExchange", {
     from: deployer,
     args,
     log: true,
     waitConfirmations: (network.config as any)?.blockConfirmations || 1,
   });
 
-  log("TierX deployed to address", tierXContract.address);
+  log("WyvernExchange deployed to address", wyvernExchangeContract.address);
 
   log("--------------------------------------------------");
 };

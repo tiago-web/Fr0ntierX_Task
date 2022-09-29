@@ -6,11 +6,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import { toastError } from "../utils/errorHandlers";
-
-import { Web3Provider } from "@ethersproject/providers";
 import { ethers } from "ethers";
-import { blockchainAbis, blockchainAddresses } from "../chain/config";
+import { Web3Provider } from "@ethersproject/providers";
+
+import {
+  blockchainAbis,
+  blockchainAddresses,
+  blockchainParams,
+} from "../chain/config";
 import {
   Front,
   StaticMarket,
@@ -18,6 +21,7 @@ import {
   WyvernExchange,
   WyvernRegistry,
 } from "../chain/typechain-types";
+import { toastError } from "../utils/errorHandlers";
 
 interface AccountContextData {
   provider?: Web3Provider;
@@ -27,6 +31,7 @@ interface AccountContextData {
   staticMarketContract?: StaticMarket;
   registryContract?: WyvernRegistry;
   accountAddress?: string;
+  signer?: ethers.providers.JsonRpcSigner;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
 }
@@ -44,6 +49,9 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
   const [erc20Contract, setErc20Contract] = useState<TierX | undefined>();
   const [erc721Contract, setErc721Contract] = useState<Front | undefined>();
   const [accountAddress, setAccountAddress] = useState<string | undefined>();
+  const [signer, setSigner] = useState<
+    ethers.providers.JsonRpcSigner | undefined
+  >();
   const [exchangeContract, setExchangeContract] = useState<
     WyvernExchange | undefined
   >();
@@ -91,7 +99,25 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
     []
   );
 
-  const connectWallet = useCallback(async () => {
+  //   window.ethereum.request({
+  //     method: "wallet_addEthereumChain",
+  //     params: [
+  //       {
+  //         chainId: "0x89",
+  //         rpcUrls: ["https://rpc-mainnet.matic.network/"],
+  //         chainName: "Matic Mainnet",
+  //         nativeCurrency: {
+  //           name: "MATIC",
+  //           symbol: "MATIC",
+  //           decimals: 18,
+  //         },
+  //         blockExplorerUrls: ["https://polygonscan.com/"],
+  //       },
+  //     ],
+  //   });
+  // };
+
+  const connectToWallet = useCallback(async () => {
     const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
     await web3Provider.send("eth_requestAccounts", []);
 
@@ -101,20 +127,78 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
     connectAddresses(signer);
 
     setProvider(web3Provider);
+    setSigner(signer);
     setAccountAddress(address);
     localStorage.setItem("isWalletConnected", "true");
   }, [connectAddresses]);
+
+  const requestChangeNetworkAndConnect = useCallback(async () => {
+    if (!window?.ethereum) {
+      toastError("Metamask is not installed, please install!");
+    }
+    const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    const { chainId } = await web3Provider.getNetwork();
+
+    if (blockchainParams.chainId) {
+      console.info(chainId, parseInt(blockchainParams.chainId, 16));
+
+      if (chainId !== parseInt(blockchainParams.chainId, 16)) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: blockchainParams.chainId }],
+          });
+
+          await connectToWallet();
+        } catch (switchError: any) {
+          // This error code indicates that the chain has not been added to MetaMask.
+          if (switchError?.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [blockchainParams],
+              });
+              await connectToWallet();
+            } catch (addError) {
+              console.log(addError);
+              toastError(addError);
+              localStorage.setItem("isWalletConnected", "false");
+            }
+          } else if (switchError?.code === 4001) {
+            toastError(
+              "To connect your wallet you must switch to the right network!"
+            );
+            localStorage.setItem("isWalletConnected", "false");
+          }
+        }
+      } else {
+        connectToWallet();
+      }
+    }
+  }, [connectToWallet]);
+
+  const connectWallet = useCallback(async () => {
+    try {
+      await requestChangeNetworkAndConnect();
+    } catch (err) {
+      console.log(err);
+      toastError(err);
+    }
+  }, [requestChangeNetworkAndConnect]);
 
   const disconnectWallet = useCallback(() => {
     setAccountAddress(undefined);
     localStorage.setItem("isWalletConnected", "false");
   }, []);
-
+  // requestChangeNetworkAndConnect
   useEffect(() => {
     if (localStorage?.getItem("isWalletConnected") === "true") {
-      connectWallet();
+      console.log("here");
+
+      requestChangeNetworkAndConnect();
     }
-  }, [connectWallet]);
+  }, [requestChangeNetworkAndConnect]);
 
   const contextValue = useMemo(
     () => ({
@@ -125,6 +209,7 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
       staticMarketContract,
       registryContract,
       accountAddress,
+      signer,
       connectWallet,
       disconnectWallet,
     }),
@@ -137,6 +222,7 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
       registryContract,
       connectWallet,
       accountAddress,
+      signer,
       disconnectWallet,
     ]
   );

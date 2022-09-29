@@ -10,7 +10,7 @@ async function bootstrap() {
 
   app.enableCors();
 
-  // use this pipe to validate http requests app wide
+  // Use this pipe to validate http requests app wide
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

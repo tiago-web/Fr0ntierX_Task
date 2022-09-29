@@ -9,6 +9,12 @@
     // optional:
     // "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["./scripts", "./test", "./deploy", "./tasks"],
+  "include": [
+    "./scripts",
+    "./test",
+    "./deploy",
+    "./tasks",
+    "1-basic-erc721-trade.js"
+  ],
   "files": ["./hardhat.config.ts", "./helper-hardhat-config.ts"]
 }

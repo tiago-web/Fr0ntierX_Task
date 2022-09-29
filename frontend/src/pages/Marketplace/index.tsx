@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 import { CircularProgress } from "@mui/material";
 
-import { useAccount } from "../../contexts/AccountContext";
 import NFTCard from "../../components/NFTCard";
 import ConnectWallet from "../../components/ConnectWallet";
-import { api } from "../../api";
+
+import { useAccount } from "../../contexts/AccountContext";
+import { OrderProps, SignatureProps } from "../../hooks/useMarket";
+
 import { toastError } from "../../utils/errorHandlers";
+import { api } from "../../api";
 
 import "./styles.css";
 
@@ -20,6 +25,9 @@ interface FindListingsResponse {
   tokenURI: string;
   price: number;
   tokenId: string;
+  orderOne: OrderProps;
+  sigOne: SignatureProps;
+  sellerAddress: string;
 }
 
 type ListedNftsProps = IMetadata & Omit<FindListingsResponse, "tokenURI">;
@@ -28,8 +36,9 @@ const Marketplace: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [listedNfts, setListedNfts] = useState<ListedNftsProps[]>([]);
   const { accountAddress } = useAccount();
+  const navigate = useNavigate();
 
-  const loadMyNFTs = useCallback(async () => {
+  const loadListedNFTs = useCallback(async () => {
     if (!accountAddress) {
       return;
     }
@@ -37,31 +46,12 @@ const Marketplace: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { data: listings } = await api.post<FindListingsResponse[]>(
+      const { data: listings } = await api.get<FindListingsResponse[]>(
         "market/find-listings"
       );
 
       const availableNfts: ListedNftsProps[] = [];
 
-      // todo: remove mock
-      // availableNfts.push(
-      //   {
-      //     image:
-      //       "https://post.greatist.com/wp-content/uploads/sites/3/2020/02/322868_1100-800x825.jpg",
-      //     name: "Dog",
-      //     description: "A cute dog",
-      //     price: 2,
-      //     tokenId: "0",
-      //   },
-      //   {
-      //     image:
-      //       "https://post.greatist.com/wp-content/uploads/sites/3/2020/02/322868_1100-800x825.jpg",
-      //     name: "Dog 2",
-      //     description: "A cute dog 2",
-      //     price: 20,
-      //     tokenId: "1",
-      //   }
-      // );
       for (const listing of listings) {
         const requestURL = listing.tokenURI.replace(
           "ipfs://",
@@ -88,8 +78,8 @@ const Marketplace: React.FC = () => {
   }, [accountAddress]);
 
   useEffect(() => {
-    loadMyNFTs();
-  }, [loadMyNFTs]);
+    loadListedNFTs();
+  }, [loadListedNFTs]);
 
   return (
     <>
@@ -112,11 +102,34 @@ const Marketplace: React.FC = () => {
           }}
         />
       ) : (
-        <div className="nfts-container">
-          {listedNfts.map((nft) => (
-            <NFTCard key={nft.name} nft={nft} showBuyBtn />
-          ))}
-        </div>
+        <>
+          {listedNfts.length ? (
+            <div className="nfts-container">
+              {listedNfts.map((nft) => (
+                <NFTCard
+                  key={nft.name}
+                  nft={nft}
+                  showBuyBtn
+                  loadListedNFTs={loadListedNFTs}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="no-nfts-container">
+              <p>
+                There are no NFTs being listed on the market at the moment. Be
+                the first to list yours!
+              </p>
+              <button
+                onClick={() => {
+                  navigate("/my-nfts");
+                }}
+              >
+                List My NFTs
+              </button>
+            </div>
+          )}
+        </>
       )}
     </>
   );

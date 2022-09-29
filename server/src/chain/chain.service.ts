@@ -24,15 +24,10 @@ export class ChainService {
   constructor() {
     this.ethersProvider = ethers.providers.getDefaultProvider(config.rpcUrl);
 
-    // let deployerWallet: Wallet;
-    // if (config.deployerMnemonic) {
-    //   deployerWallet = ethers.Wallet.fromMnemonic(config.deployerMnemonic);
-    // } else {
     const deployerWallet = new ethers.Wallet(
       config.deployerPrivateKey,
       this.ethersProvider,
     );
-    // }
 
     this.signer = deployerWallet.connect(this.ethersProvider);
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import { IMetadata } from "../pages/Marketplace";
 import { toastError } from "./errorHandlers";
 

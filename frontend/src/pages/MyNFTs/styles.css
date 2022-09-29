@@ -7,11 +7,21 @@
 
 .nfts-container {
   width: 100%;
-  column-gap: 20px;
+  column-gap: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
 }
 
 .connect-wallet-wrapper {
   width: fit-content;
+}
+
+.no-nfts-container {
+  width: 35rem;
+  margin: 0 auto;
+}
+
+.no-nfts-container p {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
 }

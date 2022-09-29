@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { IOrder } from "../interfaces/IOrder";
+import { ISignature } from "../interfaces/ISignature";
 
 export class CreateListingDto {
   @ApiProperty()
@@ -18,9 +19,8 @@ export class CreateListingDto {
   order: IOrder;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
-  signature: string;
+  signature: ISignature;
 
   @ApiProperty()
   @IsString()

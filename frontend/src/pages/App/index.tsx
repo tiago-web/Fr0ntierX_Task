@@ -1,6 +1,6 @@
 import { Toaster } from "react-hot-toast";
-import Header from "../../components/Header";
 
+import Header from "../../components/Header";
 import AccountProvider from "../../contexts/AccountContext";
 
 import "./styles.css";
@@ -14,7 +14,11 @@ const App: React.FC<AppProps> = ({ children }) => {
     <AccountProvider>
       <Header />
       <div className="app-container">{children}</div>
-      <Toaster />
+      <Toaster
+        containerStyle={{
+          top: "5rem",
+        }}
+      />
     </AccountProvider>
   );
 };

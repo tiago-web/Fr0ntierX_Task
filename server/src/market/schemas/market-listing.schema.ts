@@ -2,6 +2,7 @@ import { Prop, raw, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { Document } from "mongoose";
 import { IOrder } from "../interfaces/IOrder";
+import { ISignature } from "../interfaces/ISignature";
 
 export type MarketListingDocument = MarketListing & Document;
 
@@ -33,6 +34,15 @@ export class MarketListing {
     }),
   )
   order: IOrder;
+
+  @Prop(
+    raw({
+      r: { type: String },
+      s: { type: String },
+      v: { type: Number },
+    }),
+  )
+  sellerSignature: ISignature;
 
   @Prop()
   active: boolean;

@@ -1,9 +1,17 @@
-import { useEffect, useState } from "react";
-import Web3 from "web3";
+import { useCallback } from "react";
+import { ethers } from "ethers";
+
+import { useAccount } from "../contexts/AccountContext";
+import {
+  parseSig,
+  eip712Order,
+  structToSign,
+  ZERO_BYTES32,
+  ZERO_ADDRESS,
+} from "../utils/wyvern";
+
 import { blockchainAbis } from "../chain/config";
 import { OrderApprovedEventObject } from "../chain/typechain-types/abis/WyvernExchange";
-import { useAccount } from "../contexts/AccountContext";
-import { wrap, ZERO_BYTES32 } from "../utils/wyvern";
 
 interface ListERC721ForERC20Options {
   tokenId: number;
@@ -18,15 +26,22 @@ interface BuyErc721ForErc20Options {
 interface ExecuteErc721ForErc20Options {
   tokenId: number;
   buyingPrice: number;
-  account_a: string;
-  account_b: string;
-  orderOne: Order;
-  sigOne: string;
-  orderTwo: Order;
-  sigTwo: string;
+  sellerAddress: string;
+  buyerAddress: string;
+  orderOne: OrderProps;
+  sigOne: SignatureProps;
+  orderTwo: OrderProps;
+  sigTwo: SignatureProps;
 }
 
-interface Order
+export interface SignatureProps {
+  r: string;
+  s: string;
+  v: number;
+  suffix?: string;
+}
+
+export interface OrderProps
   extends Omit<
     OrderApprovedEventObject,
     | "maximumFill"
@@ -42,21 +57,30 @@ interface Order
   salt: string;
 }
 
+interface CallProps {
+  target: string;
+  howToCall: number;
+  data: string;
+}
+
 interface UseMarketProps {
   listErc721ForErc20: (
     options: ListERC721ForERC20Options
-  ) => Promise<{ orderOne: Order; sigOne: string } | undefined>;
+  ) => Promise<
+    { orderOne: OrderProps; sigOne: SignatureProps | undefined } | undefined
+  >;
 
   buyErc721ForErc20: (
     options: BuyErc721ForErc20Options
-  ) => Promise<{ orderTwo: Order; sigTwo: string } | undefined>;
+  ) => Promise<
+    { orderTwo: OrderProps; sigTwo: SignatureProps | undefined } | undefined
+  >;
   executeErc721ForErc20: (
     options: ExecuteErc721ForErc20Options
   ) => Promise<void>;
 }
 
 export const useMarket = (): UseMarketProps => {
-  const [wrappedExchange, setWrappedExchange] = useState<any>();
   const {
     erc20Contract,
     erc721Contract,
@@ -64,198 +88,315 @@ export const useMarket = (): UseMarketProps => {
     staticMarketContract,
     exchangeContract,
     accountAddress,
+    signer,
   } = useAccount();
 
-  useEffect(() => {
-    if (exchangeContract) {
-      setWrappedExchange(wrap(exchangeContract));
-    }
-  }, [exchangeContract]);
+  const listErc721ForErc20 = useCallback(
+    async (options: ListERC721ForERC20Options) => {
+      if (
+        !erc721Contract ||
+        !erc20Contract ||
+        !registryContract ||
+        !staticMarketContract ||
+        !exchangeContract ||
+        !accountAddress
+      )
+        return;
+      const { tokenId, sellingPrice } = options;
 
-  const listErc721ForErc20 = async (options: ListERC721ForERC20Options) => {
-    if (
-      !erc721Contract ||
-      !erc20Contract ||
-      !registryContract ||
-      !staticMarketContract ||
-      !wrappedExchange ||
-      !accountAddress
-    )
-      return;
-    const { tokenId, sellingPrice } = options;
+      const hasProxy =
+        (await registryContract.proxies(accountAddress)) !== ZERO_ADDRESS;
 
-    // todo: Validate if there is a proxy already registered
-    // register proxy for account a
-    // await registryContract.registerProxy({ from: accountAddress });
+      // Validate if there is a proxy already registered
+      if (!hasProxy) {
+        // Register proxy for the listing account
+        const tx = await registryContract.registerProxy();
 
-    // const proxy1 = await registryContract.proxies(accountAddress);
+        await tx.wait();
+      }
 
-    // Approve proxy to use all NFTs from account a
-    // todo: Validate if the user already approved for all
-    // await erc721Contract.setApprovalForAll(proxy1, true, {
-    //   from: accountAddress,
-    // });
+      const proxy = await registryContract.proxies(accountAddress);
 
-    const web3 = new Web3(window.web3.currentProvider);
+      const isApprovedForAll = await erc721Contract.isApprovedForAll(
+        accountAddress,
+        proxy
+      );
 
-    // choose function for account a
-    const selectorOne = web3.eth.abi.encodeFunctionSignature(
-      "ERC721ForERC20(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
-    );
+      // Validate if the user already approved for all
+      if (!isApprovedForAll) {
+        // Approve proxy to use all NFTs from the listing account
+        const tx = await erc721Contract.setApprovalForAll(proxy, true);
 
-    // set trading params
-    const paramsOne = web3.eth.abi.encodeParameters(
-      ["address[2]", "uint256[2]"],
-      [
-        [erc721Contract.address, erc20Contract.address],
-        [tokenId, sellingPrice],
-      ]
-    );
+        await tx.wait();
+      }
 
-    // Register order
-    const orderOne: Order = {
-      registry: registryContract.address,
-      maker: accountAddress,
-      staticTarget: staticMarketContract.address,
-      staticSelector: selectorOne,
-      staticExtradata: paramsOne,
-      maximumFill: 1,
-      listingTime: "0",
-      expirationTime: "10000000000",
-      salt: "11",
-    };
+      // Choose function for account a
+      const selectorOne = ethers.utils
+        .id("ERC721ForERC20(bytes,address[7],uint8[2],uint256[6],bytes,bytes)")
+        .substring(0, 10);
 
-    // Sign order
-    const sigOne = await wrappedExchange.sign(orderOne, accountAddress);
+      // Set trading params
+      const paramsOne = ethers.utils.defaultAbiCoder.encode(
+        ["address[2]", "uint256[2]"],
+        [
+          [erc721Contract.address, erc20Contract.address],
+          [tokenId, ethers.utils.parseEther(String(sellingPrice))],
+        ]
+      );
 
-    return { orderOne, sigOne };
-  };
+      // Register order
+      const orderOne: OrderProps = {
+        registry: registryContract.address,
+        maker: accountAddress,
+        staticTarget: staticMarketContract.address,
+        staticSelector: selectorOne,
+        staticExtradata: paramsOne,
+        maximumFill: 1,
+        listingTime: "0",
+        expirationTime: "10000000000",
+        salt: String(Math.floor(Math.random() * 99999999999999)), // Generate a random salt
+      };
 
-  const buyErc721ForErc20 = async (options: BuyErc721ForErc20Options) => {
-    if (
-      !erc721Contract ||
-      !erc20Contract ||
-      !registryContract ||
-      !staticMarketContract ||
-      !wrappedExchange ||
-      !accountAddress
-    )
-      return;
+      // Sign order
+      const sigOne = await sign(orderOne);
 
-    const { tokenId, buyingPrice } = options;
+      return { orderOne, sigOne };
+    },
+    [
+      erc721Contract,
+      erc20Contract,
+      registryContract,
+      staticMarketContract,
+      exchangeContract,
+      accountAddress,
+    ]
+  );
 
-    // todo: Validate if there is a proxy already registered
-    // register proxy for account b
-    await registryContract.registerProxy({ from: accountAddress });
+  const buyErc721ForErc20 = useCallback(
+    async (options: BuyErc721ForErc20Options) => {
+      if (
+        !erc721Contract ||
+        !erc20Contract ||
+        !registryContract ||
+        !staticMarketContract ||
+        !exchangeContract ||
+        !accountAddress
+      )
+        return;
 
-    const proxy2 = await registryContract.proxies(accountAddress);
+      const { tokenId, buyingPrice } = options;
 
-    // Approve proxy to spend erc20 tokens
-    await erc20Contract.approve(proxy2, buyingPrice, {
-      from: accountAddress,
-    });
+      const userBalance = (
+        await erc20Contract.balanceOf(accountAddress)
+      ).toString();
 
-    const web3 = new Web3(window.web3.currentProvider);
+      const parsedPrice = ethers.utils
+        .parseEther(String(buyingPrice))
+        .toString();
 
-    // choose function for account b
-    const selectorTwo = web3.eth.abi.encodeFunctionSignature(
-      "ERC20ForERC721(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
-    );
+      if (Number(userBalance) < Number(parsedPrice)) {
+        throw new Error("Insuficient FRT balance");
+      }
 
-    // set trading params
-    const paramsTwo = web3.eth.abi.encodeParameters(
-      ["address[2]", "uint256[2]"],
-      [
-        [erc20Contract.address, erc721Contract.address],
-        [tokenId, buyingPrice],
-      ]
-    );
+      const hasProxy =
+        (await registryContract.proxies(accountAddress)) !== ZERO_ADDRESS;
 
-    // Register second order
-    const orderTwo = {
-      registry: registryContract.address,
-      maker: accountAddress,
-      staticTarget: staticMarketContract.address,
-      staticSelector: selectorTwo,
-      staticExtradata: paramsTwo,
-      maximumFill: 1,
-      listingTime: "0",
-      expirationTime: "10000000000",
-      salt: "12",
-    };
+      // Validate if there is a proxy already registered
+      if (!hasProxy) {
+        // Register proxy for the buying account
+        const tx = await registryContract.registerProxy();
+        await tx.wait();
+      }
 
-    // Sign order
-    const sigTwo = await wrappedExchange.sign(orderTwo, accountAddress);
+      const proxy = await registryContract.proxies(accountAddress);
 
-    return { orderTwo, sigTwo };
-  };
+      // Approve proxy to spend erc20 tokens buyingPrice amount of erc20 tokens
+      const tx = await erc20Contract.approve(
+        proxy,
+        ethers.utils.parseEther(String(buyingPrice))
+      );
+      await tx.wait();
 
-  const executeErc721ForErc20 = async (
-    options: ExecuteErc721ForErc20Options
-  ) => {
-    if (
-      !erc721Contract ||
-      !erc20Contract ||
-      !registryContract ||
-      !staticMarketContract ||
-      !wrappedExchange
-    )
-      return;
+      // Choose function for account b
+      const selectorTwo = ethers.utils
+        .id("ERC20ForERC721(bytes,address[7],uint8[2],uint256[6],bytes,bytes)")
+        .substring(0, 10);
 
-    const {
-      tokenId,
-      buyingPrice,
-      account_a,
-      account_b,
-      orderOne,
-      sigOne,
-      orderTwo,
-      sigTwo,
-    } = options;
+      // Set trading params
+      const paramsTwo = ethers.utils.defaultAbiCoder.encode(
+        ["address[2]", "uint256[2]"],
+        [
+          [erc20Contract.address, erc721Contract.address],
+          [tokenId, ethers.utils.parseEther(String(buyingPrice))],
+        ]
+      );
 
-    const web3 = new Web3(window.web3.currentProvider);
+      // Register second order
+      const orderTwo = {
+        registry: registryContract.address,
+        maker: accountAddress,
+        staticTarget: staticMarketContract.address,
+        staticSelector: selectorTwo,
+        staticExtradata: paramsTwo,
+        maximumFill: 1,
+        listingTime: "0",
+        expirationTime: "10000000000",
+        salt: String(Math.floor(Math.random() * 99999999999999)), // Generate a random salt
+      };
 
-    const erc721c = new web3.eth.Contract(
-      blockchainAbis.frontAbi as any,
-      erc721Contract.address
-    );
-    const erc20c = new web3.eth.Contract(
-      blockchainAbis.tierXAbi as any,
-      erc20Contract.address
-    );
+      // Sign order
+      const sigTwo = await sign(orderTwo);
 
-    // transfer tokens (can be done after the list matches)
-    const firstData = erc721c.methods
-      .transferFrom(account_a, account_b, tokenId)
-      .encodeABI();
-    const secondData = erc20c.methods
-      .transferFrom(account_b, account_a, buyingPrice)
-      .encodeABI();
+      return { orderTwo, sigTwo };
+    },
+    [
+      erc721Contract,
+      erc20Contract,
+      registryContract,
+      staticMarketContract,
+      exchangeContract,
+      accountAddress,
+    ]
+  );
 
-    // assign calls
-    const firstCall = {
-      target: erc721Contract.address,
-      howToCall: 0,
-      data: firstData,
-    };
-    const secondCall = {
-      target: erc20Contract.address,
-      howToCall: 0,
-      data: secondData,
-    };
+  const executeErc721ForErc20 = useCallback(
+    async (options: ExecuteErc721ForErc20Options) => {
+      if (!erc721Contract || !erc20Contract) return;
 
-    // exchange happening (can be triggered by another account)
-    await wrappedExchange.atomicMatchWith(
-      orderOne,
-      sigOne,
-      firstCall,
-      orderTwo,
-      sigTwo,
-      secondCall,
-      ZERO_BYTES32,
-      { from: accountAddress }
-    );
-  };
+      const {
+        tokenId,
+        buyingPrice,
+        sellerAddress,
+        buyerAddress,
+        orderOne,
+        sigOne,
+        orderTwo,
+        sigTwo,
+      } = options;
+
+      const frontInterface = new ethers.utils.Interface(
+        blockchainAbis.frontAbi
+      );
+      const tierXInterface = new ethers.utils.Interface(
+        blockchainAbis.tierXAbi
+      );
+
+      const firstData = frontInterface.encodeFunctionData("transferFrom", [
+        sellerAddress,
+        buyerAddress,
+        tokenId,
+      ]);
+
+      const secondData = tierXInterface.encodeFunctionData("transferFrom", [
+        buyerAddress,
+        sellerAddress,
+        ethers.utils.parseEther(String(buyingPrice)),
+      ]);
+
+      // Assign calls
+      const firstCall = {
+        target: erc721Contract.address,
+        howToCall: 0,
+        data: firstData,
+      };
+      const secondCall = {
+        target: erc20Contract.address,
+        howToCall: 0,
+        data: secondData,
+      };
+
+      // Trigger exchange
+      await atomicMatchWith(
+        orderOne,
+        sigOne,
+        firstCall,
+        orderTwo,
+        sigTwo,
+        secondCall,
+        ZERO_BYTES32
+      );
+    },
+    [erc721Contract, erc20Contract]
+  );
+
+  const atomicMatchWith = useCallback(
+    async (
+      order: OrderProps,
+      sig: SignatureProps,
+      call: CallProps,
+      counterorder: OrderProps,
+      countersig: SignatureProps,
+      countercall: CallProps,
+      metadata: string
+    ) => {
+      if (!exchangeContract) return;
+
+      const tx = await exchangeContract.atomicMatch_(
+        [
+          order.registry,
+          order.maker,
+          order.staticTarget,
+          order.maximumFill,
+          order.listingTime,
+          order.expirationTime,
+          order.salt,
+          call.target,
+          counterorder.registry,
+          counterorder.maker,
+          counterorder.staticTarget,
+          counterorder.maximumFill,
+          counterorder.listingTime,
+          counterorder.expirationTime,
+          counterorder.salt,
+          countercall.target,
+        ],
+        [order.staticSelector, counterorder.staticSelector],
+        order.staticExtradata,
+        call.data,
+        counterorder.staticExtradata,
+        countercall.data,
+        [call.howToCall, countercall.howToCall],
+        metadata,
+        ethers.utils.defaultAbiCoder.encode(
+          ["bytes", "bytes"],
+          [
+            ethers.utils.defaultAbiCoder.encode(
+              ["uint8", "bytes32", "bytes32"],
+              [sig.v, sig.r, sig.s]
+            ) + (sig?.suffix || ""),
+            ethers.utils.defaultAbiCoder.encode(
+              ["uint8", "bytes32", "bytes32"],
+              [countersig.v, countersig.r, countersig.s]
+            ) + (countersig?.suffix || ""),
+          ]
+        )
+      );
+
+      await tx.wait();
+    },
+    [exchangeContract]
+  );
+
+  const sign = useCallback(
+    async (order: OrderProps): Promise<SignatureProps | undefined> => {
+      if (!exchangeContract) return;
+
+      const str = structToSign(order, exchangeContract.address);
+
+      const parsedSignature = parseSig(
+        await signer._signTypedData(
+          str.domain,
+          {
+            Order: eip712Order.fields,
+          },
+          order
+        )
+      );
+
+      return parsedSignature;
+    },
+    [exchangeContract, signer]
+  );
 
   return {
     listErc721ForErc20,

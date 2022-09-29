@@ -29,6 +29,7 @@ contract Front is ERC721A, Ownable {
 
     for (uint256 i = 0; i < ipfsHashes.length; i++) {
       _tokenURIs[currentIndex] = ipfsHashes[i];
+      currentIndex++;
     }
 
     // `_mint`'s second argument now takes in a `quantity`, not a `tokenId`.

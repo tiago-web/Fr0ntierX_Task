@@ -1,13 +1,14 @@
 import React, { useCallback, useState } from "react";
 
 import Modal from "../Modal";
-import { useMarket } from "../../hooks/useMarket";
-
-import "./styles.css";
 import { NFTProps } from "../NFTCard";
-import { toastError } from "../../utils/errorHandlers";
+
 import { api } from "../../api";
 import { useAccount } from "../../contexts/AccountContext";
+import { useMarket } from "../../hooks/useMarket";
+
+import { toastError, toastSuccess } from "../../utils/errorHandlers";
+import "./styles.css";
 
 interface ListNFTModal {
   nft: NFTProps;
@@ -29,9 +30,8 @@ const ListNFTModal: React.FC<ListNFTModal> = ({ nft, open, onClose }) => {
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-
       const contractResponse = await listErc721ForErc20({
         tokenId: Number(nft.tokenId),
         sellingPrice: Number(sellingPrice),
@@ -49,6 +49,8 @@ const ListNFTModal: React.FC<ListNFTModal> = ({ nft, open, onClose }) => {
         userAddress: accountAddress,
       });
 
+      toastSuccess("NFT listed successfully");
+
       onClose();
     } catch (err) {
       toastError(err);
@@ -57,8 +59,20 @@ const ListNFTModal: React.FC<ListNFTModal> = ({ nft, open, onClose }) => {
   }, [listErc721ForErc20, sellingPrice, accountAddress]);
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={() => {
+        if (!loading) {
+          onClose();
+        }
+      }}
+    >
       <div className="list-nft-modal">
+        <img src={nft.image} alt={nft.name} />
+        <p className="nft-name">
+          <strong>NFT Name:</strong> {nft.name}
+        </p>
+
         <label htmlFor="price">Selling price: </label>
         <div className="input-wrapper">
           <input

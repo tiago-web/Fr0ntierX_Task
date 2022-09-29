@@ -12,12 +12,7 @@ const ConnectWallet: React.FC = () => {
   return (
     <>
       {!accountAddress ? (
-        <button
-          className="connect-wallet"
-          onClick={async () => {
-            await connectWallet();
-          }}
-        >
+        <button className="connect-wallet" onClick={connectWallet}>
           Connect Wallet
         </button>
       ) : (

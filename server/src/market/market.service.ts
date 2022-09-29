@@ -3,8 +3,6 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 
 import { CreateListingDto } from "./dto/create-listing.dto";
-import { CancelListingDto } from "./dto/cancel-listing.dto";
-import { FindListingsDto } from "./dto/find-listings.dto";
 
 import {
   MarketListing,
@@ -70,7 +68,7 @@ export class MarketService {
 
         // Deactivate token listing
         await this.marketListingModel.updateOne(
-          { tokenId: tokenId },
+          { tokenId: tokenId, active: true },
           {
             $set: { active: false },
           },
@@ -80,16 +78,6 @@ export class MarketService {
   }
 
   async createListing(createListingDto: CreateListingDto) {
-    // recover address from signature
-    const sellerAddress = await this.chainService.recoverAddress(
-      createListingDto.signature,
-      String(createListingDto.tokenId),
-    );
-
-    if (sellerAddress !== createListingDto.userAddress) {
-      throw new Error("Invalid signature.");
-    }
-
     const tokenOwner = await this.chainService.ownerOfFront(
       createListingDto.tokenId,
     );
@@ -98,113 +86,85 @@ export class MarketService {
       throw new Error("Invalid token owner.");
     }
 
-    try {
-      const listing = new this.marketListingModel({
-        tokenId: createListingDto.tokenId,
-        sellerAddress: createListingDto.userAddress,
-        price: createListingDto.price,
-        order: createListingDto.order,
-        active: true,
+    const foundListing = await this.marketListingModel
+      .findOne({ tokenId: createListingDto.tokenId, active: true })
+      .exec();
+
+    if (foundListing !== null) {
+      throw new Error("Token already listed");
+    }
+
+    const listing = new this.marketListingModel({
+      tokenId: createListingDto.tokenId,
+      sellerAddress: createListingDto.userAddress,
+      price: createListingDto.price,
+      sellerSignature: createListingDto.signature,
+      order: createListingDto.order,
+      active: true,
+    });
+
+    await listing.save();
+  }
+
+  async findListings() {
+    const foundListedTokens = await this.marketListingModel
+      .find({ active: true })
+      .exec();
+
+    const tokens = [];
+
+    for (const listedToken of foundListedTokens) {
+      const tokenURI = await this.chainService.getTokenURI(listedToken.tokenId);
+
+      tokens.push({
+        tokenURI,
+        price: listedToken.price,
+        tokenId: listedToken.tokenId,
+        orderOne: listedToken.order,
+        sigOne: listedToken.sellerSignature,
+        sellerAddress: listedToken.sellerAddress,
       });
-
-      await listing.save();
-    } catch (err) {
-      throw new Error(err);
-    }
-  }
-
-  async findListings(findListingsDto: FindListingsDto) {
-    try {
-      const { page = 1, limit = 10 } = findListingsDto;
-
-      const foundListedTokens = await this.marketListingModel
-        .find({ active: true })
-        .skip((page - 1) * limit)
-        .limit(limit * 1)
-        .exec();
-
-      const tokens = [];
-
-      for (const listedToken of foundListedTokens) {
-        const tokenURI = await this.chainService.getTokenURI(
-          listedToken.tokenId,
-        );
-
-        tokens.push({
-          tokenURI,
-          price: listedToken.price,
-          tokenId: listedToken.tokenId,
-        });
-      }
-
-      return tokens;
-    } catch (err) {
-      throw new Error(err);
-    }
-  }
-
-  async cancelListing(cancelListingDto: CancelListingDto) {
-    // recover address from signature
-    const sellerAddress = await this.chainService.recoverAddress(
-      cancelListingDto.signature,
-      String(cancelListingDto.tokenId),
-    );
-
-    if (sellerAddress !== cancelListingDto.userAddress) {
-      throw new Error("Invalid signature.");
     }
 
-    try {
-      await this.marketListingModel.findOneAndUpdate(
-        { userAddress: cancelListingDto.userAddress },
-        {
-          $set: { active: false },
-        },
-        {
-          new: true,
-        },
-      );
-    } catch (err) {
-      throw new Error(err);
-    }
+    return tokens;
   }
 
   async findUserNFTs(userAddress: string): Promise<string[]> {
-    try {
-      const tokens = [];
+    const tokens = [];
 
-      const nfts = await this.getUser(userAddress);
+    const { tokenIds } = await this.getUser(userAddress);
 
-      for (const tokenId of nfts.tokenIds) {
-        const tokenURI = await this.chainService.getTokenURI(tokenId);
+    for (const tokenId of tokenIds) {
+      const tokenURI = await this.chainService.getTokenURI(tokenId);
 
-        tokens.push({ tokenURI, tokenId });
-      }
+      const foundListing = await this.marketListingModel
+        .findOne({
+          tokenId,
+          active: true,
+        })
+        .exec();
 
-      return tokens;
-    } catch (err) {
-      throw new Error(err);
+      tokens.push({ tokenURI, tokenId, isListed: foundListing !== null });
     }
+
+    return tokens;
   }
 
   private async getUser(userAddress: string) {
-    try {
-      let user = await this.userModel.findOne({ userAddress }).exec();
+    let user = await this.userModel.findOne({ userAddress }).exec();
 
-      if (!user) {
-        const newUser = new this.userModel({
-          userAddress,
-          tokenIds: [],
-        });
+    if (user === null) {
+      // Create new user if it doesn't exist
+      const newUser = new this.userModel({
+        userAddress,
+        tokenIds: [],
+      });
 
-        await newUser.save();
+      await newUser.save();
 
-        user = newUser;
-      }
-
-      return user;
-    } catch (err) {
-      throw new Error(err);
+      user = newUser;
     }
+
+    return user;
   }
 }

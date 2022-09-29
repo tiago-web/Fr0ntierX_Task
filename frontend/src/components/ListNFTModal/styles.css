@@ -4,8 +4,8 @@
   width: 100%;
 }
 .list-nft-modal label {
-  font-size: 0.8rem;
-  margin: 0.6rem 0 0.2rem 0.2rem;
+  font-size: 1rem;
+  margin: 0.4rem 0 0.2rem;
 }
 .list-nft-modal .input-wrapper {
   display: flex;
@@ -15,4 +15,31 @@
 .list-nft-modal .input-wrapper input {
   flex: 1;
   margin-right: 0.6rem;
+
+  background: transparent;
+  border: 1px solid #005e2a;
+  border-radius: 5px;
+  color: var(--dark);
+  padding: 0.4rem;
+}
+
+.list-nft-modal img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 0.4rem;
+}
+
+.list-nft-modal .nft-name strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.list-nft-modal p {
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.buy-nft-modal button {
+  width: 100%;
+  margin-top: 0.8rem;
 }

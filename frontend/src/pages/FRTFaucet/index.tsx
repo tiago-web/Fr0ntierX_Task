@@ -1,10 +1,11 @@
 import { useCallback, useState } from "react";
 import { ethers } from "ethers";
-
 import CircularProgress from "@mui/material/CircularProgress";
 
 import ConnectWallet from "../../components/ConnectWallet";
 import { useAccount } from "../../contexts/AccountContext";
+
+import { toastError, toastSuccess } from "../../utils/errorHandlers";
 
 import "./styles.css";
 
@@ -18,8 +19,13 @@ const FRTFaucet: React.FC = () => {
     if (!accountAddress || !erc20Contract) return;
     setIsMinting(true);
 
-    const tx = await erc20Contract.mint(ethers.utils.parseEther("200"));
-    await tx.wait(1);
+    try {
+      const tx = await erc20Contract.mint(ethers.utils.parseEther("200"));
+      await tx.wait(1);
+      toastSuccess("You've just received 200 FRT tokens");
+    } catch (err) {
+      toastError(err);
+    }
     setIsMinting(false);
     setMinted(true);
   }, [erc20Contract, accountAddress]);
