@@ -379,7 +379,7 @@ export const useMarket = (): UseMarketProps => {
 
   const sign = useCallback(
     async (order: OrderProps): Promise<SignatureProps | undefined> => {
-      if (!exchangeContract) return;
+      if (!exchangeContract || !signer) return;
 
       const str = structToSign(order, exchangeContract.address);
 

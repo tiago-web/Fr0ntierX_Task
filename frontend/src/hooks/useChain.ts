@@ -21,7 +21,7 @@ export const useChain = (): UseChainProps => {
     const startBlockNumber =
       (await provider.getBlockNumber()) - TOLERANCE_BLOCK_NUMBER;
 
-    let transactionHash;
+    let transactionHash = "";
 
     const eventWatcher = new Promise((resolve) => {
       erc721Contract.on(
@@ -64,7 +64,7 @@ export const useChain = (): UseChainProps => {
     const startBlockNumber =
       (await provider.getBlockNumber()) - TOLERANCE_BLOCK_NUMBER;
 
-    let transactionHash;
+    let transactionHash = "";
 
     const eventWatcher = new Promise((resolve) => {
       erc721Contract.on("Transfer", (from, to, _tokenId, event) => {

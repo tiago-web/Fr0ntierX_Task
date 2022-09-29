@@ -4,7 +4,7 @@
 export * as exchange from "./exchange";
 export * as lib from "./lib";
 export * as registry from "./registry";
-export * as static from "./static";
+export * as statici from "./static";
 export { Front__factory } from "./Front__factory";
 export { Migrations__factory } from "./Migrations__factory";
 export { StaticMarket__factory } from "./StaticMarket__factory";
