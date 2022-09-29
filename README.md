@@ -136,4 +136,4 @@ yarn hardhat run ./scripts/fundAcc.ts --network <neworkName>
 - [Solidity](https://soliditylang.org/)
 - [Hardhat](https://hardhat.org/)
 - [Chai](https://www.chaijs.com/)
-- [IPFs]()
+- [IPFs](https://ipfs.tech/)
