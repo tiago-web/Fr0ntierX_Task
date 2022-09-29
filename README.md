@@ -1,4 +1,4 @@
-## Fr0ntierX_Task (Live on https://fr0ntierx-test.tiagosoriano.dev/)(Mumbai Testnet)
+## Fr0ntierX_Task (Live on https://fr0ntierx-test.tiagosoriano.dev/ with Mumbai Testnet)
 <p align="center">
    <img src=".github/marketplace.PNG"/>
 </p>
@@ -136,3 +136,4 @@ yarn hardhat run ./scripts/fundAcc.ts --network <neworkName>
 - [Solidity](https://soliditylang.org/)
 - [Hardhat](https://hardhat.org/)
 - [Chai](https://www.chaijs.com/)
+- [IPFs]()
