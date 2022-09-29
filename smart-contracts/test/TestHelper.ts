@@ -161,9 +161,7 @@ class TestHelper {
       options;
 
     // Approve mint tokens to account b
-    await this.erc20Contract
-      .connect(account_b)
-      .mint(account_b, erc20MintAmount);
+    await this.erc20Contract.connect(account_b).mint(erc20MintAmount);
 
     // Register proxy for account b
     await this.registryContract.connect(account_b).registerProxy();
