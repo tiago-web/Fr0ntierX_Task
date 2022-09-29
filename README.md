@@ -1,4 +1,4 @@
-## Fr0ntierX_Task (Live on https://fr0ntierx-test.tiagosoriano.dev/)
+## Fr0ntierX_Task (Live on https://fr0ntierx-test.tiagosoriano.dev/)(Mumbai Testnet)
 <p align="center">
    <img src=".github/marketplace.PNG"/>
 </p>
@@ -20,7 +20,7 @@
 
 # :link: Features
 
-- Any user can request new NFTs tokens to be minted free-of-charge.
+- Any user can request new NFTs tokens to be minted free-of-charge. (NFTs metadata and images are pinned to IPFs)
 - Users can choose the image, name and description of their NFTs.
 - Users can list their NFT token for sale for any price they want using the FRT (ERC-20) token. 
 - Users can list and review all existing and yet not executed sell offers.
