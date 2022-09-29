@@ -16,6 +16,7 @@
 - [Getting Started](#checkered_flag-getting-started)
 - [Testing](#bug-testing)
 - [FAQ](#postbox-faq)
+- [Useful commands](#eyes) 
 
 # :link: Features
 
@@ -81,11 +82,11 @@ If the project runs successfully you should a local chain running on:
 *RPC:* `http://localhost:8545`
 *Chain ID:* `1337`
 
-## Prepare terminal with environment variables
+## Inside each folder, prepare terminal with environment variables
 
 ```bash
 # make a copy of environment variables
-$ cp .env.sample .env
+$ cp .env.example .env
 
 # edit .env with an editor, eg vim
 $ vim .env
@@ -108,11 +109,11 @@ Then:
 
 `yarn test` or `npm run test`
 
-# Usefull commands
+# :eyes: Useful commands
 
 ```sh
 # To generate contract types
-`yarn typechain`
+yarn typechain
 
 # to generate all the deployed address TS file and abis
 yarn hardhat files-writer --network <neworkName>
