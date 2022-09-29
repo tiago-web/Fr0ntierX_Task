@@ -81,6 +81,21 @@ If the project runs successfully you should a local chain running on:
 *RPC:* `http://localhost:8545`
 *Chain ID:* `1337`
 
+## Prepare terminal with environment variables
+
+```bash
+# make a copy of environment variables
+$ cp .env.sample .env
+
+# edit .env with an editor, eg vim
+$ vim .env
+
+# add to environment
+$ source .env
+```
+
+Edit values to reflect local configuration environment
+
 # :bug: Testing
 
 In order to test the application, you should run the following command:
@@ -92,6 +107,19 @@ In order to test the application, you should run the following command:
 Then:
 
 `yarn test` or `npm run test`
+
+# Usefull commands
+
+```sh
+# To generate contract types
+`yarn typechain`
+
+# to generate all the deployed address TS file and abis
+yarn hardhat files-writer --network <neworkName>
+
+# to fund an account
+yarn hardhat run ./scripts/fundAcc.ts --network <neworkName>
+```
 
 # :postbox: FAQ
 
