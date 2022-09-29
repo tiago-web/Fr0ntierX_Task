@@ -33,7 +33,6 @@ describe("ERC721Trade", () => {
         account_b: alice,
       };
 
-      // todo: separate logic from list_erc721_for_erc20
       const { orderOne, sigOne } = await helper.list_erc721_for_erc20({
         tokenId: data.tokenId,
         mintQuantity: data.mintQuantity,
@@ -41,7 +40,6 @@ describe("ERC721Trade", () => {
         account_a: data.account_a,
       });
 
-      // todo: separate logic from buy_erc721_for_erc20
       const { orderTwo, sigTwo } = await helper.buy_erc721_for_erc20({
         tokenId: data.tokenId,
         buyingPrice: data.buyingPrice,
@@ -61,7 +59,6 @@ describe("ERC721Trade", () => {
       assert.equal(buyerBalance.toString(), "15000");
       assert.equal(sellerBalance.toString(), "1000000000000000000000");
 
-      // todo: separate logic from execute_erc721_for_erc20
       await helper.execute_erc721_for_erc20({
         tokenId: data.tokenId,
         buyingPrice: data.buyingPrice,

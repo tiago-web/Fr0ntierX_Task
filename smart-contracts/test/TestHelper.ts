@@ -218,7 +218,7 @@ class TestHelper {
       sigTwo,
     } = options;
 
-    // transfer tokens (can be done after the list matches)
+    // Transfer tokens (can be done after the list matches)
     let frontInterface = new ethers.utils.Interface(frontAbi);
     let tierXInterface = new ethers.utils.Interface(tierXAbi);
 
@@ -234,7 +234,7 @@ class TestHelper {
       buyingPrice,
     ]);
 
-    // assign calls
+    // Assign calls
     const firstCall = {
       target: this.erc721Contract.address,
       howToCall: 0,
