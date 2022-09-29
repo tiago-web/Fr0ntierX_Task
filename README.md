@@ -64,6 +64,10 @@ Then:
 
 `yarn && yarn start` or `npm i && npm run start`
 
+If the project runs successfully you should be able to access it on:
+
+`http://127.0.0.1:5173/`
+
 **Smart contracts**
 
 `cd smart-contracts`
