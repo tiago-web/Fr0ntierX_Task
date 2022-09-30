@@ -99,24 +99,6 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
     []
   );
 
-  //   window.ethereum.request({
-  //     method: "wallet_addEthereumChain",
-  //     params: [
-  //       {
-  //         chainId: "0x89",
-  //         rpcUrls: ["https://rpc-mainnet.matic.network/"],
-  //         chainName: "Matic Mainnet",
-  //         nativeCurrency: {
-  //           name: "MATIC",
-  //           symbol: "MATIC",
-  //           decimals: 18,
-  //         },
-  //         blockExplorerUrls: ["https://polygonscan.com/"],
-  //       },
-  //     ],
-  //   });
-  // };
-
   const connectToWallet = useCallback(async () => {
     const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
     await web3Provider.send("eth_requestAccounts", []);
@@ -191,11 +173,9 @@ const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
     setAccountAddress(undefined);
     localStorage.setItem("isWalletConnected", "false");
   }, []);
-  // requestChangeNetworkAndConnect
+
   useEffect(() => {
     if (localStorage?.getItem("isWalletConnected") === "true") {
-      console.log("here");
-
       requestChangeNetworkAndConnect();
     }
   }, [requestChangeNetworkAndConnect]);
