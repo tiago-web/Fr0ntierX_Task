@@ -107,11 +107,15 @@ const NFTCard: React.FC<NFTCardProps> = ({
         onRefreshAndClose={async () => {
           if (loadListedNFTs) {
             await watchPurchase();
-            loadListedNFTs();
+
+            // Give some time for the server update
+            setTimeout(() => {
+              loadListedNFTs();
+            }, 2000);
           }
           setShowBuyNFTModal(false);
         }}
-        onClose={async () => {
+        onClose={() => {
           setShowBuyNFTModal(false);
         }}
       />
