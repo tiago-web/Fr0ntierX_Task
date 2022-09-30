@@ -1,4 +1,4 @@
-# Fr0ntierX_Task
+## Fr0ntierX_Task (Live on https://fr0ntierx-test.tiagosoriano.dev/ with Mumbai Testnet)
 <p align="center">
    <img src=".github/marketplace.PNG"/>
 </p>
@@ -16,10 +16,11 @@
 - [Getting Started](#checkered_flag-getting-started)
 - [Testing](#bug-testing)
 - [FAQ](#postbox-faq)
+- [Useful commands](#eyes) 
 
 # :link: Features
 
-- Any user can request new NFTs tokens to be minted free-of-charge.
+- Any user can request new NFTs tokens to be minted free-of-charge. (NFTs metadata and images are pinned to IPFs)
 - Users can choose the image, name and description of their NFTs.
 - Users can list their NFT token for sale for any price they want using the FRT (ERC-20) token. 
 - Users can list and review all existing and yet not executed sell offers.
@@ -64,6 +65,10 @@ Then:
 
 `yarn && yarn start` or `npm i && npm run start`
 
+If the project runs successfully you should be able to access it on:
+
+`http://127.0.0.1:5173/`
+
 **Smart contracts**
 
 `cd smart-contracts`
@@ -77,6 +82,21 @@ If the project runs successfully you should a local chain running on:
 *RPC:* `http://localhost:8545`
 *Chain ID:* `1337`
 
+## Inside each folder, prepare terminal with environment variables
+
+```bash
+# make a copy of environment variables
+$ cp .env.example .env
+
+# edit .env with an editor, eg vim
+$ vim .env
+
+# add to environment
+$ source .env
+```
+
+Edit values to reflect local configuration environment
+
 # :bug: Testing
 
 In order to test the application, you should run the following command:
@@ -88,6 +108,19 @@ In order to test the application, you should run the following command:
 Then:
 
 `yarn test` or `npm run test`
+
+# :eyes: Useful commands
+
+```sh
+# To generate contract types
+yarn typechain
+
+# to generate all the deployed address TS file and abis
+yarn hardhat files-writer --network <neworkName>
+
+# to fund an account
+yarn hardhat run ./scripts/fundAcc.ts --network <neworkName>
+```
 
 # :postbox: FAQ
 
@@ -103,3 +136,4 @@ Then:
 - [Solidity](https://soliditylang.org/)
 - [Hardhat](https://hardhat.org/)
 - [Chai](https://www.chaijs.com/)
+- [IPFs](https://ipfs.tech/)
