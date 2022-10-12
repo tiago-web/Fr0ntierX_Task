@@ -1,4 +1,3 @@
-## Fr0ntierX_Task (Live on https://fr0ntierx-test.tiagosoriano.dev/ with Mumbai Testnet)
 <p align="center">
    <img src=".github/marketplace.PNG"/>
 </p>
